@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login - Ahmed Anter Academy</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial,Helvetica,sans-serif;
+        }
+
+        body{
+
+            background:#f5f7fb;
+
+            display:flex;
+
+            justify-content:center;
+
+            align-items:center;
+
+            height:100vh;
+
+        }
+
+        .container{
+
+            width:420px;
+
+            background:white;
+
+            padding:40px;
+
+            border-radius:15px;
+
+            box-shadow:0 10px 25px rgba(0,0,0,.15);
+
+        }
+
+        h1{
+
+            text-align:center;
+
+            margin-bottom:30px;
+
+            color:#0d6efd;
+
+        }
+
+        label{
+
+            display:block;
+
+            margin-top:15px;
+
+            margin-bottom:6px;
+
+            font-weight:bold;
+
+        }
+
+        input{
+
+            width:100%;
+
+            padding:12px;
+
+            border:1px solid #ccc;
+
+            border-radius:6px;
+
+            font-size:16px;
+
+        }
+
+        button{
+
+            width:100%;
+
+            margin-top:25px;
+
+            padding:14px;
+
+            background:#0d6efd;
+
+            color:white;
+
+            border:none;
+
+            border-radius:6px;
+
+            font-size:18px;
+
+            cursor:pointer;
+
+        }
+
+        button:hover{
+
+            background:#0b5ed7;
+
+        }
+
+        #message{
+
+            margin-top:20px;
+
+            text-align:center;
+
+            font-weight:bold;
+
+        }
+
+        a{
+
+            display:block;
+
+            text-align:center;
+
+            margin-top:25px;
+
+            text-decoration:none;
+
+            color:#0d6efd;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Student Login</h1>
+
+<label>Email</label>
+
+<input
+id="email"
+type="email"
+placeholder="Enter your email">
+
+<label>Password</label>
+
+<input
+id="password"
+type="password"
+placeholder="Enter your password">
+
+<button onclick="login()">
+
+Login
+
+</button>
+
+<p id="message"></p>
+
+<a href="/register-page">
+
+Don't have an account? Register
+
+</a>
+
+</div>
+
+<script>
+
+async function login(){
+
+    const email=document.getElementById("email").value;
+
+    const password=document.getElementById("password").value;
+
+    const response=await fetch("/login",{
+
+        method:"POST",
+
+        headers:{
+
+            "Content-Type":"application/json"
+
+        },
+
+        body:JSON.stringify({
+
+            email:email,
+
+            password:password
+
+        })
+
+    });
+
+    const data=await response.json();
+
+    if(response.ok){
+
+        localStorage.setItem("token",data.access_token);
+
+        localStorage.setItem("name",data.full_name);
+
+        localStorage.setItem("role",data.role);
+
+        document.getElementById("message").innerHTML="Login Successful";
+
+        setTimeout(function(){
+
+            if(data.role==="admin"){
+
+                window.location="/admin";
+
+            }
+
+            else{
+
+                window.location="/dashboard";
+
+            }
+
+        },1000);
+
+    }
+
+    else{
+
+        document.getElementById("message").innerHTML=data.detail;
+
+    }
+
+}
+
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Admin Dashboard</title>
+
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    background:#f4f6f9;
+}
+
+
+header{
+
+    background:#0d6efd;
+    color:white;
+    padding:20px 40px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+}
+
+
+header h1{
+
+    font-size:30px;
+
+}
+
+
+button{
+
+    border:none;
+    padding:10px 18px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+
+.logout{
+
+    background:#dc3545;
+    color:white;
+
+}
+
+
+.container{
+
+    width:95%;
+    max-width:1400px;
+    margin:40px auto;
+
+}
+
+
+.card{
+
+    background:white;
+    border-radius:10px;
+    padding:25px;
+    box-shadow:0 5px 15px rgba(0,0,0,.1);
+    margin-bottom:25px;
+
+}
+
+
+table{
+
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+
+}
+
+
+th{
+
+    background:#0d6efd;
+    color:white;
+    padding:12px;
+
+}
+
+
+td{
+
+    padding:12px;
+    border-bottom:1px solid #ddd;
+    text-align:center;
+
+}
+
+
+.action{
+
+    padding:6px 12px;
+    color:white;
+    border-radius:4px;
+
+}
+
+
+.edit{
+
+    background:green;
+
+}
+
+
+.add{
+
+    background:#198754;
+    color:white;
+    margin-top:15px;
+
+}
+
+
+.save{
+
+    background:#0d6efd;
+    color:white;
+
+}
+
+
+input, select{
+
+    width:100%;
+    padding:10px;
+    margin:8px 0 15px;
+    border:1px solid #ccc;
+    border-radius:5px;
+
+}
+
+
+.form-grid{
+
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+
+}
+
+
+.hidden{
+
+    display:none;
+
+}
+
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<header>
+
+<h1>Ahmed Anter Academy - Admin</h1>
+
+<button class="logout" onclick="logout()">
+Logout
+</button>
+
+</header>
+
+
+
+<div class="container">
+
+
+
+<div class="card">
+
+
+<h2>Registered Students</h2>
+
+
+<button class="add" onclick="showAddForm()">
++ Add Student
+</button>
+
+
+<table>
+
+
+<thead>
+
+<tr>
+
+<th>ID</th>
+<th>Full Name</th>
+<th>Email</th>
+<th>Country</th>
+<th>WhatsApp</th>
+<th>Level</th>
+<th>Goal</th>
+<th>Actions</th>
+
+</tr>
+
+</thead>
+
+
+<tbody id="studentsTable">
+
+
+</tbody>
+
+
+</table>
+
+
+</div>
+
+
+
+
+<div class="card hidden" id="studentForm">
+
+
+<h2 id="formTitle">
+Add Student
+</h2>
+
+
+<div class="form-grid">
+
+
+<div>
+
+<label>Full Name</label>
+<input id="full_name">
+
+</div>
+
+
+<div>
+
+<label>Email</label>
+<input id="email">
+
+</div>
+
+
+<div>
+
+<label>Country</label>
+<input id="country">
+
+</div>
+
+
+<div>
+
+<label>WhatsApp</label>
+<input id="whatsapp">
+
+</div>
+
+
+<div>
+
+<label>Level</label>
+<input id="level">
+
+</div>
+
+
+<div>
+
+<label>Goal</label>
+<input id="goal">
+
+</div>
+
+
+</div>
+
+
+<button class="save" onclick="saveStudent()">
+Save
+</button>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+<script>
+
+
+let editingID = null;
+
+
+
+const role = localStorage.getItem("role");
+
+
+if(role !== "admin"){
+
+    alert("Admins only.");
+
+    window.location="/dashboard";
+
+}
+
+
+
+
+async function loadStudents(){
+
+
+    const response = await fetch("/admin/students");
+
+
+    const students = await response.json();
+
+
+
+    const table = document.getElementById("studentsTable");
+
+
+    table.innerHTML="";
+
+
+
+    students.forEach(student=>{
+
+
+        table.innerHTML += `
+
+        <tr>
+
+        <td>${student.id}</td>
+
+        <td>${student.full_name || ""}</td>
+
+        <td>${student.email || ""}</td>
+
+        <td>${student.country || ""}</td>
+
+        <td>${student.whatsapp || ""}</td>
+
+        <td>${student.level || ""}</td>
+
+        <td>${student.goal || ""}</td>
+
+
+        <td>
+
+        <button class="action edit"
+        onclick='editStudent(${JSON.stringify(student)})'>
+
+        Edit
+
+        </button>
+
+        </td>
+
+
+        </tr>
+
+        `;
+
+
+    });
+
+
+}
+
+
+
+
+function showAddForm(){
+
+
+    editingID=null;
+
+
+    document.getElementById("formTitle").innerHTML="Add Student";
+
+
+    clearForm();
+
+
+    document.getElementById("studentForm")
+    .classList.remove("hidden");
+
+
+}
+
+
+
+
+function editStudent(student){
+
+
+    editingID=student.id;
+
+
+    document.getElementById("formTitle").innerHTML="Edit Student";
+
+
+    document.getElementById("full_name").value=student.full_name || "";
+
+    document.getElementById("email").value=student.email || "";
+
+    document.getElementById("country").value=student.country || "";
+
+    document.getElementById("whatsapp").value=student.whatsapp || "";
+
+    document.getElementById("level").value=student.level || "";
+
+    document.getElementById("goal").value=student.goal || "";
+
+
+
+    document.getElementById("studentForm")
+    .classList.remove("hidden");
+
+
+}
+
+
+
+
+async function saveStudent(){
+
+
+    const data={
+
+
+        full_name:
+        document.getElementById("full_name").value,
+
+
+        email:
+        document.getElementById("email").value,
+
+
+        country:
+        document.getElementById("country").value,
+
+
+        whatsapp:
+        document.getElementById("whatsapp").value,
+
+
+        level:
+        document.getElementById("level").value,
+
+
+        goal:
+        document.getElementById("goal").value
+
+    };
+
+
+
+    let url="/admin/students";
+
+    let method="POST";
+
+
+
+    if(editingID !== null){
+
+        url=`/admin/students/${editingID}`;
+
+        method="PUT";
+
+    }
+
+
+
+    const response = await fetch(url,{
+
+        method:method,
+
+        headers:{
+
+            "Content-Type":"application/json"
+
+        },
+
+        body:JSON.stringify(data)
+
+    });
+
+
+
+    if(response.ok){
+
+
+        alert("Saved successfully");
+
+
+        document.getElementById("studentForm")
+        .classList.add("hidden");
+
+
+        loadStudents();
+
+
+    }
+
+    else{
+
+        alert("Error saving student");
+
+    }
+
+
+}
+
+
+
+
+function clearForm(){
+
+
+    document.getElementById("full_name").value="";
+
+    document.getElementById("email").value="";
+
+    document.getElementById("country").value="";
+
+    document.getElementById("whatsapp").value="";
+
+    document.getElementById("level").value="";
+
+    document.getElementById("goal").value="";
+
+
+}
+
+
+
+
+function logout(){
+
+    localStorage.clear();
+
+    window.location="/";
+
+}
+
+
+
+loadStudents();
+
+
+</script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Courses Management</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+body{
+    background:#f4f6f9;
+}
+
+header{
+    background:#0d6efd;
+    color:white;
+    padding:20px 40px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+header h1{
+    font-size:30px;
+}
+
+.logout{
+    background:#dc3545;
+    color:white;
+    border:none;
+    padding:10px 18px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.container{
+    width:95%;
+    max-width:1400px;
+    margin:40px auto;
+}
+
+.card{
+    background:white;
+    border-radius:10px;
+    padding:25px;
+    box-shadow:0 5px 15px rgba(0,0,0,.1);
+    margin-bottom:25px;
+}
+
+.card h2{
+    margin-bottom:20px;
+}
+
+.add{
+    background:#198754;
+    color:white;
+    border:none;
+    padding:10px 20px;
+    border-radius:6px;
+    cursor:pointer;
+    margin-bottom:20px;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    background:#0d6efd;
+    color:white;
+    padding:12px;
+}
+
+td{
+    padding:12px;
+    border-bottom:1px solid #ddd;
+    text-align:center;
+}
+
+.action{
+    border:none;
+    padding:7px 14px;
+    color:white;
+    border-radius:4px;
+    cursor:pointer;
+}
+
+.edit{
+    background:green;
+}
+
+.hidden{
+    display:none;
+}
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+}
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+}
+
+.form-group label{
+    margin-bottom:6px;
+    font-weight:bold;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select{
+
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:5px;
+    font-size:15px;
+
+}
+
+.form-group textarea{
+
+    resize:vertical;
+    min-height:100px;
+
+}
+
+.full-width{
+
+    grid-column:1 / span 2;
+
+}
+
+.save{
+
+    margin-top:20px;
+    background:#0d6efd;
+    color:white;
+    border:none;
+    padding:12px 25px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.cancel{
+
+    margin-top:20px;
+    margin-left:10px;
+    background:#6c757d;
+    color:white;
+    border:none;
+    padding:12px 25px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+.status-active{
+
+    color:green;
+    font-weight:bold;
+
+}
+
+.status-hidden{
+
+    color:red;
+    font-weight:bold;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<h1>Ahmed Anter Academy - Courses</h1>
+
+<button class="logout" onclick="logout()">
+Logout
+</button>
+
+</header>
+
+<div class="container">
+
+<div class="card">
+
+<h2>Courses Management</h2>
+
+<button class="add" onclick="showAddForm()">
++ Add Course
+</button>
+
+<table>
+
+<thead>
+
+<tr>
+
+<th>ID</th>
+<th>Course</th>
+<th>Instructor</th>
+<th>Level</th>
+<th>Price</th>
+<th>Duration</th>
+<th>Status</th>
+<th>Actions</th>
+
+</tr>
+
+</thead>
+
+<tbody id="coursesTable">
+
+</tbody>
+
+</table>
+
+</div>
+
+
+<div class="card hidden" id="courseForm">
+
+<h2 id="formTitle">
+Add Course
+</h2>
+
+<div class="form-grid">
+
+<div class="form-group">
+<label>Course Name</label>
+<input id="course_name">
+</div>
+
+<div class="form-group">
+<label>Instructor</label>
+<input id="instructor" value="Ahmed Anter">
+</div>
+
+<div class="form-group full-width">
+<label>Description</label>
+<textarea id="description"></textarea>
+</div>
+
+<div class="form-group">
+<label>Level</label>
+
+<select id="level">
+
+<option>Beginner</option>
+<option>Intermediate</option>
+<option>Advanced</option>
+
+</select>
+
+</div>
+
+<div class="form-group">
+<label>Price</label>
+<input id="price" type="number">
+</div>
+
+<div class="form-group">
+<label>Duration</label>
+<input id="duration">
+</div>
+
+<div class="form-group">
+<label>Status</label>
+
+<select id="status">
+
+<option>Active</option>
+<option>Hidden</option>
+
+</select>
+
+</div>
+
+</div>
+
+<button class="save" onclick="saveCourse()">
+Save
+</button>
+
+<button class="cancel" onclick="hideForm()">
+Cancel
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+const role = localStorage.getItem("role");
+
+if(role !== "admin"){
+
+    alert("Admins only.");
+
+    window.location="/dashboard";
+
+}
+
+let editingID = null;
+
+
+async function loadCourses(){
+
+    const response = await fetch("/courses/");
+
+    const courses = await response.json();
+
+    const table = document.getElementById("coursesTable");
+
+    table.innerHTML = "";
+
+    courses.forEach(course=>{
+
+        table.innerHTML += `
+
+<tr>
+
+<td>${course.id}</td>
+
+<td>${course.course_name}</td>
+
+<td>${course.instructor}</td>
+
+<td>${course.level}</td>
+
+<td>${course.price}</td>
+
+<td>${course.duration}</td>
+
+<td>
+
+<span class="${
+course.status==="Active"
+?
+"status-active"
+:
+"status-hidden"
+}">
+
+${course.status}
+
+</span>
+
+</td>
+
+<td>
+
+<button
+class="action edit"
+onclick='editCourse(${JSON.stringify(course)})'>
+
+Edit
+
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+    });
+
+}
+
+
+
+function showAddForm(){
+
+editingID=null;
+
+document.getElementById("formTitle").innerHTML="Add Course";
+
+clearForm();
+
+document.getElementById("courseForm").classList.remove("hidden");
+
+}
+
+
+
+function hideForm(){
+
+document.getElementById("courseForm").classList.add("hidden");
+
+}
+
+
+
+function clearForm(){
+
+document.getElementById("course_name").value="";
+document.getElementById("instructor").value="Ahmed Anter";
+document.getElementById("description").value="";
+document.getElementById("level").value="Beginner";
+document.getElementById("price").value="";
+document.getElementById("duration").value="";
+document.getElementById("status").value="Active";
+
+}
+
+
+
+function editCourse(course){
+
+editingID=course.id;
+
+document.getElementById("formTitle").innerHTML="Edit Course";
+
+document.getElementById("course_name").value=course.course_name;
+document.getElementById("instructor").value=course.instructor;
+document.getElementById("description").value=course.description;
+document.getElementById("level").value=course.level;
+document.getElementById("price").value=course.price;
+document.getElementById("duration").value=course.duration;
+document.getElementById("status").value=course.status;
+
+document.getElementById("courseForm").classList.remove("hidden");
+
+}
+
+
+
+async function saveCourse(){
+
+const data={
+
+course_name:document.getElementById("course_name").value,
+
+instructor:document.getElementById("instructor").value,
+
+description:document.getElementById("description").value,
+
+level:document.getElementById("level").value,
+
+price:parseInt(document.getElementById("price").value),
+
+duration:document.getElementById("duration").value,
+
+status:document.getElementById("status").value
+
+};
+
+let url="/courses/";
+let method="POST";
+
+if(editingID!==null){
+
+url=`/courses/${editingID}`;
+method="PUT";
+
+}
+
+const response=await fetch(url,{
+
+method:method,
+
+headers:{
+"Content-Type":"application/json"
+},
+
+body:JSON.stringify(data)
+
+});
+
+if(response.ok){
+
+alert("Course saved successfully.");
+
+hideForm();
+
+loadCourses();
+
+}
+else{
+
+alert("Error saving course.");
+
+}
+
+}
+
+
+
+function logout(){
+
+localStorage.clear();
+
+window.location="/";
+
+}
+
+loadCourses();
+
+</script>
+
+</body>
+
+</html>

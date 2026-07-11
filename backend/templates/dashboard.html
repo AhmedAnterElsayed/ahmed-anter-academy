@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Student Dashboard</title>
+
+    <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:Arial,Helvetica,sans-serif;
+        }
+
+        body{
+            background:#f5f7fb;
+        }
+
+        header{
+
+            background:#0d6efd;
+
+            color:white;
+
+            padding:20px 40px;
+
+            display:flex;
+
+            justify-content:space-between;
+
+            align-items:center;
+
+        }
+
+        header h1{
+
+            font-size:30px;
+
+        }
+
+        button{
+
+            background:#dc3545;
+
+            color:white;
+
+            border:none;
+
+            padding:12px 20px;
+
+            border-radius:6px;
+
+            cursor:pointer;
+
+            font-size:16px;
+
+        }
+
+        .container{
+
+            width:90%;
+
+            max-width:1100px;
+
+            margin:40px auto;
+
+        }
+
+        .welcome{
+
+            background:white;
+
+            padding:30px;
+
+            border-radius:10px;
+
+            box-shadow:0 5px 15px rgba(0,0,0,.1);
+
+            margin-bottom:30px;
+
+        }
+
+        .welcome h2{
+
+            color:#0d6efd;
+
+            margin-bottom:15px;
+
+        }
+
+        .cards{
+
+            display:grid;
+
+            grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+
+            gap:20px;
+
+        }
+
+        .card{
+
+            background:white;
+
+            padding:25px;
+
+            border-radius:10px;
+
+            box-shadow:0 5px 15px rgba(0,0,0,.1);
+
+        }
+
+        .card h3{
+
+            color:#0d6efd;
+
+            margin-bottom:15px;
+
+        }
+
+        .card ul{
+
+            padding-left:20px;
+
+            line-height:2;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<header>
+
+<h1>Ahmed Anter Academy</h1>
+
+<button onclick="logout()">
+
+Logout
+
+</button>
+
+</header>
+
+<div class="container">
+
+<div class="welcome">
+
+<h2 id="welcome"></h2>
+
+<p><strong>Role:</strong> <span id="role"></span></p>
+
+<p style="margin-top:10px;">
+
+Welcome to your personal dashboard.
+
+Here you will access your lessons, assignments, Zoom meetings, announcements and course materials.
+
+</p>
+
+</div>
+
+<div class="cards">
+
+<div class="card">
+
+<h3>Your Courses</h3>
+
+<ul>
+
+<li>HTML</li>
+
+<li>CSS</li>
+
+<li>JavaScript</li>
+
+<li>Python</li>
+
+<li>SQL</li>
+
+<li>FastAPI</li>
+
+</ul>
+
+</div>
+
+<div class="card">
+
+<h3>Upcoming Features</h3>
+
+<ul>
+
+<li>Live Zoom Classes</li>
+
+<li>Homework</li>
+
+<li>Assignments</li>
+
+<li>Quizzes</li>
+
+<li>Certificates</li>
+
+<li>Progress Tracking</li>
+
+</ul>
+
+</div>
+
+<div class="card">
+
+<h3>Community</h3>
+
+<ul>
+
+<li>Telegram Group</li>
+
+<li>WhatsApp Group</li>
+
+<li>Discussion Forum</li>
+
+<li>Announcements</li>
+
+</ul>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const token=localStorage.getItem("token");
+
+const name=localStorage.getItem("name");
+
+const role=localStorage.getItem("role");
+
+if(!token){
+
+    window.location="/login-page";
+
+}
+
+document.getElementById("welcome").innerHTML="Welcome, "+name+"!";
+
+document.getElementById("role").innerHTML=role;
+
+function logout(){
+
+    localStorage.removeItem("token");
+
+    localStorage.removeItem("name");
+
+    localStorage.removeItem("role");
+
+    window.location="/";
+
+}
+
+</script>
+
+</body>
+
+</html>
