@@ -56,15 +56,17 @@ app.include_router(courses.router)
 
 
 # =====================================
-# Home
+# Home Page
 # =====================================
 
 @app.get("/")
-def home():
-    return {
-        "message": "Welcome to Ahmed Anter Academy",
-        "status": "Running Successfully"
-    }
+def home(request: Request):
+    return templates.TemplateResponse(
+        "index.html",
+        {
+            "request": request
+        }
+    )
 
 
 # =====================================
